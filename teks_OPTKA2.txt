@@ -4125,8 +4125,8 @@ blight of maize, leaf blight of
 Sorghum spp., leaf spot of
 grasses, diplodia ear and stalk
 rot, white ear rot of maize
-7. [s]: Diaporthe Abelmoschus esculentus batang (stems), bibit Indonesia: Jawa (Jawa Barat)
-phaseolorum (Cooke & (okra), Abutilon theophrasti (seedlings), biji (true Africa: Cameroon, Egypt,
+7. [s]: Diaporthe phaseolorum Abelmoschus esculentus batang (stems), bibit Indonesia: Jawa (Jawa Barat)
+(Cooke & (okra), Abutilon theophrasti (seedlings), biji (true Africa: Cameroon, Egypt,
 Ellis) Sacc., 1882; (velvet leaf), Allium cepa seeds, grains), buah Guyana, Malawi, Nigeria,
 (Syn. Diaporthe (bawang bombay, onion), (fruits), daun (leaves), Senegal, Sierra Leone, South
 aspalathi E. Jansen, Castl. Allium sativum (bawang media tanam (growing Africa, Tanzania
@@ -4349,8 +4349,8 @@ Polynesia, New Zealand, Papua
 --- Halaman 130 ---
 28
 Nugini
-11. [s]: Erysiphe Cissus rhombifolia (grape ivy), batang (stems (above Indonesia: Jawa (Jawa Timur),
-necator Schwein., 1832; Hevea brasiliensis (karet, ground), trunks, Bali
+11. [s]: Erysiphe necator Schwein. Cissus rhombifolia (grape ivy), batang (stems (above Indonesia: Jawa (Jawa Timur),
+, 1832; Hevea brasiliensis (karet, ground), trunks, Bali
 (Syn. Erysiphe rubber), Vitis, Vitis vinifera branches), bibit Africa: Algeria, Congo, DR
 necator var. ampelopsidis (anggur, grapevine), Vitis (seedlings), buah Congo, Egypt, Ethiopia, Kenya,
 (Peck) U. Braun & S. vinifera subsp. Sylvestris (fruits), bunga Libya, Malawi, Mauritania,
@@ -4527,8 +4527,8 @@ silver scurf Kingdom
 Oceania: Australia, New
 Caledonia, New Zealand, Papua
 Nugini
-16. [s]: Leptosphaeria Alliaria, Arabidopsis thaliana, akar (roots), batang Indonesia: Jawa, Sumatera
-maculans (Tul. & C. Tul.) Argemone mexicana (jaruju, (stems (above (Sumatera Barat), Sulawesi
+16. [s]: Leptosphaeria maculans (Tul. & C. Tul.) Alliaria, Arabidopsis thaliana, akar (roots), batang Indonesia: Jawa, Sumatera
+Argemone mexicana (jaruju, (stems (above (Sumatera Barat), Sulawesi
 Ces. & De Not., 1863; Mexican poppy), Asteraceae, ground), trunks, (Sulawesi Selatan, Sulawesi
 (Syn. Phaeosphaeria Astragalus adsurgens, Avena branches), biji (true Utara)
 sowerbyi (Fuckel) L. Holm, sativa (oat, oats), Beta seeds), buah (fruits), Africa: Egypt, Ethiopia, Kenya,
@@ -5432,8 +5432,8 @@ Canada, Cuba, Chile,
 Guatemala, Mexico, USA,
 Uruguay
 Oceania: Australia, New Zealand
-26. [s]: Sclerotinia Abelmoschus esculentus akar (roots), batang Indonesia: Jawa (Jawa Barat,
-sclerotiorum (Lib.) de (bendi, okra), Acroptilon (stems (above Jawa Tengah)
+26. [s]: Sclerotinia sclerotiorum (Lib.) Abelmoschus esculentus akar (roots), batang Indonesia: Jawa (Jawa Barat,
+de (bendi, okra), Acroptilon (stems (above Jawa Tengah)
 Bary, 1884; repens (Russian knapweed), ground), trunks, Africa: Algeria, Congo, DR
 (Syn. Helotium Actinidia chinensis (kiwi, branches), biji (true Congo, Egypt, Ethiopia, Kenya,
 sclerotiorum (Lib.) Fuckel, Chinese gooseberry), Actinidia seeds, grains), buah Libya, Malawi, Mauritius,
@@ -7418,6 +7418,7 @@ Oceania: Australia, Cook
 Islands, Fiji, French Polynesia,
 New Zealand, Papua Nugini,
 Semoa
+
 
 
 
