@@ -4024,8 +4024,8 @@ strumarium (common
 cocklebur), Yucca gigantea
 (spineless yucca),
 Zea spp.
-5. [s]: Ceratocystis Acacia decurrens (green akar (roots), batang Indonesia: Jawa, Kalimantan,
-fimbriata Ellis & Halst., wattle), Acacia mangium (stems (above Sumatera (Nangroe Aceh
+5. [s]: Ceratocystis fimbriata Acacia decurrens (green akar (roots), batang Indonesia: Jawa, Kalimantan,
+Ellis & Halst., wattle), Acacia mangium (stems (above Sumatera (Nangroe Aceh
 1890; (brown salwood), Acacia ground), trunks, Darussalam, Riau)
 (Syn. Ceratocystis mearnsii (black wattle), batang (stems above Africa: DR Congo, Congo,
  asi Elektronik (BSrE), Badan Siber dan Sandi Negara
@@ -7418,5 +7418,6 @@ Oceania: Australia, Cook
 Islands, Fiji, French Polynesia,
 New Zealand, Papua Nugini,
 Semoa
+
 
 
