@@ -15,10 +15,10 @@ st.markdown("""
 # 1. Baca file default
 # =======================
 try:
-    with open("D:\\PEKERJAAN\\projek_py_pencarian_OPTK A2\\teks_OPTKA2.txt", "r", encoding="utf-8") as f:
+    with open("teks_OPTKA2.txt", "r", encoding="utf-8") as f:
         lines = f.read().splitlines()
 except FileNotFoundError:
-    st.error("File default 'D:\\PEKERJAAN\\projek_py_pencarian_OPTK A2\\teks_OPTKA2.txt' tidak ditemukan!")
+    st.error("File default 'teks_OPTKA2.txt' tidak ditemukan!")
     st.stop()
 
 # =======================
@@ -106,3 +106,4 @@ if st.button("Cari"):
         )
     else:
         st.write("Tidak ditemukan hasil yang cocok.")
+
