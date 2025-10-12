@@ -16,7 +16,7 @@ st.markdown("""
         color: #ff3131;
     }
     .stApp {
-        background: linear-gradient(180deg, #0097b2, #38b6ff);
+        background: linear-gradient(180deg, #ffffff, #ffffff);
     }
     h1 {
       color: #b22222;  /* firebrick red */
@@ -87,10 +87,10 @@ st.write(f"Jumlah record: {len(records)}")
 label_style = """
 <style>
 .label-classic {
-    color: white;                  /* Ganti ke 'red' kalau mau merah */
+    color: Black;                  /* Ganti ke 'red' kalau mau merah */
     font-weight: bold;
     font-size: 12px;
-    font-family: 'Times New Roman', serif;
+    font-family: 'Arial', serif;
     margin-bottom: 0px;          /* Hilangkan jarak dengan kolom input */
     padding-bottom: 0px !important;
 }
@@ -170,6 +170,7 @@ if st.button("🔍 Cari"):
         )
     else:
         st.warning("Tidak ditemukan hasil yang cocok.")
+
 
 
 
