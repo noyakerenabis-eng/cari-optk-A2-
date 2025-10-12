@@ -16,7 +16,7 @@ st.markdown("""
         color: #1800ad;
     }
     .stApp {
-        background: linear-gradient(180deg, #f9f4ec, #f2e8cf);
+        background: linear-gradient(180deg, #1800ad, #1800ad);
     }
     h1 {
         color: #5b4636;
@@ -149,5 +149,6 @@ if st.button("🔍 Cari"):
         )
     else:
         st.warning("Tidak ditemukan hasil yang cocok.")
+
 
 
