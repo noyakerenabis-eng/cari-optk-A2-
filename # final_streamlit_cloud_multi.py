@@ -84,9 +84,21 @@ if temp:
 st.write(f"Jumlah record: {len(records)}")
 
 # Input teks
-kata_inang = st.text_input("Masukkan kata untuk Inang / Host (pisahkan koma jika lebih dari satu)")
-kata_daerah = st.text_input("Masukkan kata untuk Daerah Sebar (pisahkan koma jika lebih dari satu)")
-kata_media = st.text_input("Masukkan kata untuk Media Pembawa / Pathway (pisahkan koma jika lebih dari satu)")
+# === Input dengan gaya klasik elegan ===
+label_style = """
+<p style='color:#f5deb3; font-weight:bold; font-size:16px;'>
+{}</p>
+"""
+
+st.markdown(label_style.format("Masukkan kata untuk Inang / Host (pisahkan koma jika lebih dari satu)"), unsafe_allow_html=True)
+kata_inang = st.text_input(" ", key="inang")
+
+st.markdown(label_style.format("Masukkan kata untuk Daerah Sebar (pisahkan koma jika lebih dari satu)"), unsafe_allow_html=True)
+kata_daerah = st.text_input(" ", key="daerah")
+
+st.markdown(label_style.format("Masukkan kata untuk Media Pembawa / Pathway (pisahkan koma jika lebih dari satu)"), unsafe_allow_html=True)
+kata_media = st.text_input(" ", key="media")
+
 
 # Tombol cari
 if st.button("🔍 Cari"):
@@ -149,6 +161,7 @@ if st.button("🔍 Cari"):
         )
     else:
         st.warning("Tidak ditemukan hasil yang cocok.")
+
 
 
 
