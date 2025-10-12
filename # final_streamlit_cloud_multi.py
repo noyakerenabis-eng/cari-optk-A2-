@@ -1,78 +1,30 @@
-    # final_streamlit_classic_theme.py
+# final_streamlit_csv_complete.py
 import streamlit as st
 import re
+import csv
+import io
 
 # Konfigurasi halaman
 st.set_page_config(page_title="Pencarian OPTK A2 Berdasarkan Inang/Daerah/Media by Noya", layout="wide")
 
-# CSS tema klasik
-st.markdown("""
-    <style>
-    body {
-        background-color: #1800ad;
-        background-image: radial-gradient(#1800ad 1px, transparent 1px);
-        background-size: 40px 40px;
-        font-family: 'Georgia', serif;
-        color: #ff3131;
-    }
-    .stApp {
-        background: linear-gradient(180deg, #ffffff, #ffffff);
-    }
-    h1 {
-      color: #b22222;  /* firebrick red */
-    text-align: center;
-    font-size: 2.3em;
-    text-shadow: 1px 1px 3px #ffe4e1; /* bayangan lembut merah muda */
-    margin-bottom: 0.2em;
-    }
-    .subtitle {
-        text-align: center;
-        font-style: italic;
-        color: #b22222;
-        margin-bottom: 1.5em;
-    }
-    .result {
-        background-color: #fff9f0;
-        border-left: 5px solid #b08b51;
-        padding: 10px;
-        margin: 8px 0;
-        border-radius: 10px;
-        transition: all 0.3s ease;
-    }
-    .result:hover {
-        transform: scale(1.02);
-        box-shadow: 0 0 10px rgba(176, 139, 81, 0.4);
-    }
-    a {
-        color: #8b4513;
-        text-decoration: none;
-    }
-    a:hover {
-        text-decoration: underline;
-        color: #a0522d;
-    }
-    </style>
-""", unsafe_allow_html=True)
-
-# Judul & identitas
-st.markdown("<h1>Pencarian OPTK A2 Berdasarkan Inang / Daerah / Media</h1>", unsafe_allow_html=True)
-st.markdown('<div class="subtitle">by Noya</div>', unsafe_allow_html=True)
+st.title("Pencarian OPTK A2 Berdasarkan Inang / Daerah / Media")
+st.markdown("**by: Noya**")
 st.markdown("---")
 
-# Baca file teks bawaan
+# === 1. Baca file teks bawaan ===
 try:
     with open("teks_OPTKA2.txt", "r", encoding="utf-8") as f:
         lines = f.read().splitlines()
 except FileNotFoundError:
-    st.error("File default 'teks_OPTKA2.txt' tidak ditemukan!")
+    st.error("File default 'teks_OPTKA2.txt' tidak ditemukan! Pastikan file ada di folder yang sama dengan app.py")
     st.stop()
 
-# Gabungkan baris menjadi record
+# === 2. Gabungkan baris jadi record ===
 records = []
 temp = ""
 for line in lines:
     line = line.strip()
-    if re.match(r"^\d+\.", line):
+    if re.match(r"^\d+\.", line):  # mulai record baru
         if temp:
             records.append(temp)
         temp = line
@@ -83,35 +35,14 @@ if temp:
 
 st.write(f"Jumlah record: {len(records)}")
 
-# === Input dengan gaya klasik elegan seragam ===
-label_style = """
-<style>
-.label-classic {
-    color: Black;                  /* Ganti ke 'red' kalau mau merah */
-    font-weight: bold;
-    font-size: 12px;
-    font-family: 'Arial', serif;
-    margin-bottom: 0px;          /* Hilangkan jarak dengan kolom input */
-    padding-bottom: 0px !important;
-}
-</style>
-"""
+# === 3. Input pencarian ===
+kata_inang = st.text_input("Masukkan kata untuk Inang / Host (pisahkan koma jika lebih dari satu)")
+kata_daerah = st.text_input("Masukkan kata untuk Daerah Sebar (pisahkan koma jika lebih dari satu)")
+kata_media = st.text_input("Masukkan kata untuk Media Pembawa / Pathway (pisahkan koma jika lebih dari satu)")
 
-st.markdown(label_style, unsafe_allow_html=True)
-
-st.markdown("<p class='label-classic'>Masukkan kata untuk Inang / Host (pisahkan koma jika lebih dari satu)</p>", unsafe_allow_html=True)
-kata_inang = st.text_input("", key="inang")
-
-st.markdown("<p class='label-classic'>Masukkan kata untuk Daerah Sebar (pisahkan koma jika lebih dari satu)</p>", unsafe_allow_html=True)
-kata_daerah = st.text_input("", key="daerah")
-
-st.markdown("<p class='label-classic'>Masukkan kata untuk Media Pembawa / Pathway (pisahkan koma jika lebih dari satu)</p>", unsafe_allow_html=True)
-kata_media = st.text_input("", key="media")
-
-
-# Tombol cari
+# === 4. Tombol cari ===
 if st.button("🔍 Cari"):
-    # Buat regex dari input multi
+    # Fungsi untuk buat regex list
     def buat_regex_multi(kata_input):
         if kata_input:
             kata_list = [k.strip() for k in kata_input.split(",") if k.strip()]
@@ -132,9 +63,12 @@ if st.button("🔍 Cari"):
         if cocok(pattern_inang_list) and cocok(pattern_daerah_list) and cocok(pattern_media_list):
             hasil.append(rec)
 
+    # === 5. Tampilkan hasil ===
     if hasil:
-        st.write(f"✅ Ditemukan {len(hasil)} record. Klik nama untuk melihat di Google:")
+        st.success(f"Ditemukan {len(hasil)} record.")
         hasil_2kata = []
+        data_csv = []
+
         for i, h in enumerate(hasil, start=1):
             h_clean = re.sub(r"^\d+\.\s*", "", h)
             h_clean = re.sub(r"--- Halaman \d+ ---", "", h_clean)
@@ -142,51 +76,46 @@ if st.button("🔍 Cari"):
             h_clean = h_clean.strip()
             kata_split = h_clean.split()
 
-            # logika hasil dua atau tiga kata
+            # logika nama OPTK
             if kata_split and "[" in kata_split[0]:
                 kata1 = kata_split[0]
                 kata2 = kata_split[1] if len(kata_split) > 1 else ""
                 kata3 = kata_split[2] if len(kata_split) > 2 else ""
-                kata_ambil = " ".join([kata1, kata2, kata3])
+                target = " ".join([kata1, kata2, kata3])
                 query_google = f"{kata2} {kata3}"
             else:
-                kata_ambil = " ".join(kata_split[:2])
-                query_google = kata_ambil
+                target = " ".join(kata_split[:2])
+                query_google = target
 
-            hasil_2kata.append(kata_ambil)
             google_link = f"https://www.google.com/search?q={query_google.replace(' ', '+')}"
-            st.markdown(
-                f'<div class="result"><b>{i}. <a href="{google_link}" target="_blank">{kata_ambil}</a></b></div>',
-                unsafe_allow_html=True
-            )
+            st.markdown(f"{i}. [{target}]({google_link})", unsafe_allow_html=True)
+            hasil_2kata.append(target)
 
-        # Tombol download hasil
-        csv_content = "Hasil Kata\n" + "\n".join(hasil_2kata)
+            # Simulasi parsing (karena teks aslinya tidak rapi)
+            host = re.search(r"[Hh]ost[:：]\s*([^;]*)", h)
+            pathway = re.search(r"[Pp]athway[:：]\s*([^;]*)", h)
+            dist = re.search(r"[Dd]istribution[:：]\s*([^;]*)", h)
+
+            data_csv.append({
+                "No": i,
+                "Target": target,
+                "Host": host.group(1).strip() if host else "-",
+                "Pathway": pathway.group(1).strip() if pathway else "-",
+                "Distribution": dist.group(1).strip() if dist else "-"
+            })
+
+        # === 6. Download CSV ===
+        output = io.StringIO()
+        writer = csv.DictWriter(output, fieldnames=["No", "Target", "Host", "Pathway", "Distribution"])
+        writer.writeheader()
+        writer.writerows(data_csv)
+
         st.download_button(
-            label="💾 Download CSV",
-            data=csv_content,
-            file_name="hasil_multi_kata.csv",
+            label="💾 Download CSV Lengkap",
+            data=output.getvalue(),
+            file_name="hasil_lengkap.csv",
             mime="text/csv"
         )
+
     else:
         st.warning("Tidak ditemukan hasil yang cocok.")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
