@@ -44,7 +44,6 @@ if temp:
     records.append(temp)
 
 st.write(f"📂 Jumlah record dalam {jenis_optk}: {len(records)}")
-
 st.markdown("---")
 
 # === 5. Input pencarian ===
@@ -55,77 +54,89 @@ kata_media = st.text_input("📦 Media Pembawa / Pathway (pisahkan koma jika leb
 
 # === 6. Tombol cari ===
 if st.button("🔍 Cari"):
+
+    # === Fungsi bantu ===
     def buat_regex_multi(kata_input):
         if kata_input:
             kata_list = [k.strip() for k in kata_input.split(",") if k.strip()]
             return [re.compile(rf"\b{re.escape(k)}\b", re.IGNORECASE) for k in kata_list]
         return []
 
+    # === Buat pola regex ===
     pattern_inang_list = buat_regex_multi(kata_inang)
     pattern_daerah_list = buat_regex_multi(kata_daerah)
     pattern_media_list = buat_regex_multi(kata_media)
 
+    # === Filter hasil ===
     hasil = []
     for rec in records:
         def cocok(pattern_list):
             if not pattern_list:
                 return True
             return any(p.search(rec) for p in pattern_list)
-
         if cocok(pattern_inang_list) and cocok(pattern_daerah_list) and cocok(pattern_media_list):
             hasil.append(rec)
 
-    # === 7. Deteksi kategori organisme ===
-   kategori_optk = {
-    "Serangga": [
-        "Coleoptera", "Lepidoptera", "Diptera", "Hemiptera", "Hymenoptera", 
-        "Thysanoptera", "Orthoptera", "Isoptera", "Insecta",
-        "beetle", "weevil", "borer", "bug", "hopper", "moth", "fly", "thrips", "grasshopper"
-    ],
-    "Virus": [
-        "virus", "viroid", "begomovirus", "tospovirus", "potyvirus", "mosaic", "wilt virus"
-    ],
-    "Bakteri": [
-        "bacterium", "bacteria", "Ralstonia", "Xanthomonas", "Erwinia", 
-        "Pseudomonas", "Clavibacter", "Agrobacterium", "Burkholderia", "Curtobacterium"
-    ],
-    "Jamur": [
-        "Fusarium", "Phytophthora", "Cercospora", "Colletotrichum", "Puccinia",
-        "Alternaria", "Aspergillus", "Botrytis", "Rhizoctonia", "Sclerotium",
-        "Pythium", "Penicillium", "Verticillium", "Ustilago", "Gloeocercospora",
-        "Pachymetra", "Helminthosporium", "Curvularia", "Trichoderma"
-    ],
-    "Nematoda": [
-        "Meloidogyne", "Heterodera", "Globodera", "Pratylenchus", 
-        "Radopholus", "Ditylenchus", "Tylenchulus", "nematode"
-    ],
-    "Gulma": [
-        "weed", "Amaranthus", "Avena", "Cyperus", "Eichhornia", "Imperata",
-        "Digitaria", "Rhamphicarpa", "Striga", "Sorghum halepense", "Parthenium",
-        "Chromolaena", "Lantana", "Mikania", "Pistia"
-    ],
-    "Tungau": [
-        "Acarina", "Tetranychus", "mite", "Brevipalpus", "Panonychus", "Phyllocoptruta"
-    ],
-    "Siput": [
-        "Achatina", "Achatinidae", "snail", "slug", "Lissachatina", "Pomacea"
-    ],
-    "Serangga Penggerek Batang": [
-        "borer", "stem borer", "Rhynchophorus", "Oryctes", "Sphenophorus"
-    ],
-    "Serangga Penghisap": [
-        "Aphis", "Bemisia", "Myzus", "Planococcus", "Coccus", "Pseudococcus"
-    ],
-    "Protozoa": [
-        "Phytomyxea", "Plasmodiophora", "Spongospora"
-    ],
-    "Fitoplasma": [
-        "phytoplasma", "mycoplasma", "spiroplasma"
-    ],
-    "Lainnya": [
-        "unknown", "unidentified", "miscellaneous"
-    ]
-}
+    # === 7. Daftar kategori organisme ===
+    kategori_optk = {
+        "Serangga": [
+            "Coleoptera", "Lepidoptera", "Diptera", "Hemiptera", "Hymenoptera", 
+            "Thysanoptera", "Orthoptera", "Isoptera", "Insecta",
+            "beetle", "weevil", "borer", "bug", "hopper", "moth", "fly", "thrips", "grasshopper"
+        ],
+        "Virus": [
+            "virus", "viroid", "begomovirus", "tospovirus", "potyvirus", "mosaic", "wilt virus"
+        ],
+        "Bakteri": [
+            "bacterium", "bacteria", "Ralstonia", "Xanthomonas", "Erwinia", 
+            "Pseudomonas", "Clavibacter", "Agrobacterium", "Burkholderia", "Curtobacterium"
+        ],
+        "Jamur": [
+            "Fusarium", "Phytophthora", "Cercospora", "Colletotrichum", "Puccinia",
+            "Alternaria", "Aspergillus", "Botrytis", "Rhizoctonia", "Sclerotium",
+            "Pythium", "Penicillium", "Verticillium", "Ustilago", "Gloeocercospora",
+            "Pachymetra", "Helminthosporium", "Curvularia", "Trichoderma"
+        ],
+        "Nematoda": [
+            "Meloidogyne", "Heterodera", "Globodera", "Pratylenchus", 
+            "Radopholus", "Ditylenchus", "Tylenchulus", "nematode"
+        ],
+        "Gulma": [
+            "weed", "Amaranthus", "Avena", "Cyperus", "Eichhornia", "Imperata",
+            "Digitaria", "Rhamphicarpa", "Striga", "Sorghum halepense", "Parthenium",
+            "Chromolaena", "Lantana", "Mikania", "Pistia"
+        ],
+        "Tungau": [
+            "Acarina", "Tetranychus", "mite", "Brevipalpus", "Panonychus", "Phyllocoptruta"
+        ],
+        "Siput": [
+            "Achatina", "Achatinidae", "snail", "slug", "Lissachatina", "Pomacea"
+        ],
+        "Serangga Penggerek Batang": [
+            "borer", "stem borer", "Rhynchophorus", "Oryctes", "Sphenophorus"
+        ],
+        "Serangga Penghisap": [
+            "Aphis", "Bemisia", "Myzus", "Planococcus", "Coccus", "Pseudococcus"
+        ],
+        "Protozoa": [
+            "Phytomyxea", "Plasmodiophora", "Spongospora"
+        ],
+        "Fitoplasma": [
+            "phytoplasma", "mycoplasma", "spiroplasma"
+        ],
+        "Lainnya": [
+            "unknown", "unidentified", "miscellaneous"
+        ]
+    }
+
+    # === Fungsi deteksi kategori ===
+    def deteksi_kategori(teks):
+        for kategori, kata_list in kategori_optk.items():
+            for kata in kata_list:
+                if re.search(rf"\b{kata}\b", teks, re.IGNORECASE):
+                    return kategori
+        return "Tidak Terklasifikasi"
+
     # === 8. Tampilkan hasil terkelompok ===
     if hasil:
         st.success(f"Ditemukan {len(hasil)} record pada OPTK {jenis_optk}.")
@@ -144,8 +155,7 @@ if st.button("🔍 Cari"):
             kata_split = h_clean.split()
 
             target = " ".join(kata_split[:3])
-            query_google = target
-            google_link = f"https://www.google.com/search?q={query_google.replace(' ', '+')}"
+            google_link = f"https://www.google.com/search?q={target.replace(' ', '+')}"
 
             host = re.search(r"[Hh]ost[:：]\s*([^;]*)", h)
             pathway = re.search(r"[Pp]athway[:：]\s*([^;]*)", h)
@@ -160,10 +170,10 @@ if st.button("🔍 Cari"):
                 "Distribution": dist.group(1).strip() if dist else "-"
             })
 
-        # === 9. Tampilkan per kategori ===
+        # === 9. Tampilkan hasil per kategori ===
         for kategori, daftar in hasil_per_kategori.items():
             st.markdown(f"### 🧬 {kategori} ({len(daftar)} hasil)")
-            for idx, teks in enumerate(daftar, start=1):
+            for teks in daftar:
                 kata_split = teks.split()
                 target = " ".join(kata_split[:3])
                 link = f"https://www.google.com/search?q={target.replace(' ', '+')}"
@@ -185,4 +195,3 @@ if st.button("🔍 Cari"):
 
     else:
         st.warning(f"Tidak ditemukan hasil yang cocok pada OPTK {jenis_optk}.")
-
