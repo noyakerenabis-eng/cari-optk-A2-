@@ -87,11 +87,11 @@ st.write(f"Jumlah record: {len(records)}")
 label_style = """
 <style>
 .label-classic {
-    color: white;                  /* Ganti ke 'red' kalau mau merah */
+    color: black;                  /* Ganti ke 'red' kalau mau merah */
     font-weight: bold;
     font-size: 16px;
     font-family: 'Times New Roman', serif;
-    margin-bottom: -10px;          /* Hilangkan jarak dengan kolom input */
+    margin-bottom: -15px;          /* Hilangkan jarak dengan kolom input */
 }
 </style>
 """
@@ -169,6 +169,7 @@ if st.button("🔍 Cari"):
         )
     else:
         st.warning("Tidak ditemukan hasil yang cocok.")
+
 
 
 
