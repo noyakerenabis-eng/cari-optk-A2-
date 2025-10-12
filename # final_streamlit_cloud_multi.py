@@ -28,7 +28,7 @@ st.markdown("""
     .subtitle {
         text-align: center;
         font-style: italic;
-        color: #7b2b7b;
+        color: #b22222;
         margin-bottom: 1.5em;
     }
     .result {
@@ -149,6 +149,7 @@ if st.button("🔍 Cari"):
         )
     else:
         st.warning("Tidak ditemukan hasil yang cocok.")
+
 
 
 
