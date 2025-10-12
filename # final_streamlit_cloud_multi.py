@@ -1,30 +1,45 @@
-# final_streamlit_csv_complete.py
+# final_streamlit_csv_complete_combo.py
 import streamlit as st
 import re
 import csv
 import io
 
-# Konfigurasi halaman
-st.set_page_config(page_title="Pencarian OPTK A2 Berdasarkan Inang/Daerah/Media by Noya", layout="wide")
+# === 1. Konfigurasi halaman ===
+st.set_page_config(page_title="Pencarian OPTK A1/A2 by Noya", layout="wide")
 
-st.title("Pencarian OPTK A2 Berdasarkan Inang / Daerah / Media")
+st.title("🔎 Pencarian OPTK A1 / A2 Berdasarkan Inang / Daerah / Media")
 st.markdown("**by: Noya**")
 st.markdown("---")
 
-# === 1. Baca file teks bawaan ===
+# === 2. Pilihan jenis OPTK ===
+jenis_optk = st.selectbox(
+    "Pilih jenis OPTK yang ingin dicari:",
+    ["A1", "A2"],
+    index=1  # default ke A2
+)
+
+# Tentukan nama file berdasarkan pilihan
+file_map = {
+    "A1": "teks_OPTKA1.txt",
+    "A2": "teks_OPTKA2.txt"
+}
+
+file_terpilih = file_map[jenis_optk]
+
+# === 3. Baca file sesuai pilihan ===
 try:
-    with open("teks_OPTKA2.txt", "r", encoding="utf-8") as f:
+    with open(file_terpilih, "r", encoding="utf-8") as f:
         lines = f.read().splitlines()
 except FileNotFoundError:
-    st.error("File default 'teks_OPTKA2.txt' tidak ditemukan! Pastikan file ada di folder yang sama dengan app.py")
+    st.error(f"File '{file_terpilih}' tidak ditemukan! Pastikan file ada di folder yang sama dengan skrip ini.")
     st.stop()
 
-# === 2. Gabungkan baris jadi record ===
+# === 4. Gabungkan baris menjadi record ===
 records = []
 temp = ""
 for line in lines:
     line = line.strip()
-    if re.match(r"^\d+\.", line):  # mulai record baru
+    if re.match(r"^\d+\.", line):  # awal record baru
         if temp:
             records.append(temp)
         temp = line
@@ -33,16 +48,19 @@ for line in lines:
 if temp:
     records.append(temp)
 
-st.write(f"Jumlah record: {len(records)}")
+st.write(f"📂 Jumlah record dalam {jenis_optk}: {len(records)}")
 
-# === 3. Input pencarian ===
-kata_inang = st.text_input("Masukkan kata untuk Inang / Host (pisahkan koma jika lebih dari satu)")
-kata_daerah = st.text_input("Masukkan kata untuk Daerah Sebar (pisahkan koma jika lebih dari satu)")
-kata_media = st.text_input("Masukkan kata untuk Media Pembawa / Pathway (pisahkan koma jika lebih dari satu)")
+st.markdown("---")
 
-# === 4. Tombol cari ===
+# === 5. Input pencarian ===
+st.subheader("Masukkan kata pencarian")
+kata_inang = st.text_input("🪴 Inang / Host (pisahkan koma jika lebih dari satu)")
+kata_daerah = st.text_input("📍 Daerah Sebar (pisahkan koma jika lebih dari satu)")
+kata_media = st.text_input("📦 Media Pembawa / Pathway (pisahkan koma jika lebih dari satu)")
+
+# === 6. Tombol cari ===
 if st.button("🔍 Cari"):
-    # Fungsi untuk buat regex list
+    # Fungsi regex multi
     def buat_regex_multi(kata_input):
         if kata_input:
             kata_list = [k.strip() for k in kata_input.split(",") if k.strip()]
@@ -63,9 +81,9 @@ if st.button("🔍 Cari"):
         if cocok(pattern_inang_list) and cocok(pattern_daerah_list) and cocok(pattern_media_list):
             hasil.append(rec)
 
-    # === 5. Tampilkan hasil ===
+    # === 7. Tampilkan hasil ===
     if hasil:
-        st.success(f"Ditemukan {len(hasil)} record.")
+        st.success(f"Ditemukan {len(hasil)} record pada OPTK {jenis_optk}.")
         hasil_2kata = []
         data_csv = []
 
@@ -91,7 +109,6 @@ if st.button("🔍 Cari"):
             st.markdown(f"{i}. [{target}]({google_link})", unsafe_allow_html=True)
             hasil_2kata.append(target)
 
-            # Simulasi parsing (karena teks aslinya tidak rapi)
             host = re.search(r"[Hh]ost[:：]\s*([^;]*)", h)
             pathway = re.search(r"[Pp]athway[:：]\s*([^;]*)", h)
             dist = re.search(r"[Dd]istribution[:：]\s*([^;]*)", h)
@@ -103,20 +120,19 @@ if st.button("🔍 Cari"):
                 "Pathway": pathway.group(1).strip() if pathway else "-",
                 "Distribution": dist.group(1).strip() if dist else "-"
             })
-  # === 6. Download CSV ===
+
+        # === 8. Download CSV ===
         output = io.StringIO()
         writer = csv.DictWriter(output, fieldnames=["No", "Target", "Host", "Pathway", "Distribution"])
         writer.writeheader()
         writer.writerows(data_csv)
 
         st.download_button(
-            label="💾 Download CSV Lengkap",
+            label=f"💾 Download Hasil OPTK {jenis_optk} (CSV)",
             data=output.getvalue(),
-            file_name="hasil_lengkap.csv",
+            file_name=f"hasil_OPTKA{jenis_optk}.csv",
             mime="text/csv"
         )
 
     else:
-        st.warning("Tidak ditemukan hasil yang cocok.")
-       # === Tombol Download hasil pencarian ===
-
+        st.warning(f"Tidak ditemukan hasil yang cocok pada OPTK {jenis_optk}.")
