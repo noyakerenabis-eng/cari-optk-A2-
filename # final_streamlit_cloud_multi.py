@@ -13,7 +13,7 @@ st.markdown("""
         background-image: radial-gradient(#1800ad 1px, transparent 1px);
         background-size: 40px 40px;
         font-family: 'Georgia', serif;
-        color: #1800ad;
+        color: #ff3131;
     }
     .stApp {
         background: linear-gradient(180deg, #0097b2, #38b6ff);
@@ -149,6 +149,7 @@ if st.button("🔍 Cari"):
         )
     else:
         st.warning("Tidak ditemukan hasil yang cocok.")
+
 
 
 
