@@ -19,7 +19,7 @@ st.markdown("""
         background: linear-gradient(180deg, #0097b2, #38b6ff);
     }
     h1 {
-        color: #5b4636;
+        color: #ff3131;
         text-align: center;
         font-size: 2.3em;
         text-shadow: 1px 1px 2px #d2b48c;
@@ -28,7 +28,7 @@ st.markdown("""
     .subtitle {
         text-align: center;
         font-style: italic;
-        color: #6e5845;
+        color: #7b2b7b;
         margin-bottom: 1.5em;
     }
     .result {
@@ -149,6 +149,7 @@ if st.button("🔍 Cari"):
         )
     else:
         st.warning("Tidak ditemukan hasil yang cocok.")
+
 
 
 
