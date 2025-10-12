@@ -104,18 +104,31 @@ if st.button("🔍 Cari"):
                 "Distribution": dist.group(1).strip() if dist else "-"
             })
 
-        # === 6. Download CSV ===
-        output = io.StringIO()
-        writer = csv.DictWriter(output, fieldnames=["No", "Target", "Host", "Pathway", "Distribution"])
-        writer.writeheader()
-        writer.writerows(data_csv)
+       # === Tombol Download hasil pencarian ===
+import io
+import base64
 
-        st.download_button(
-            label="💾 Download CSV Lengkap",
-            data=output.getvalue(),
-            file_name="hasil_lengkap.csv",
-            mime="text/csv"
+if not hasil.empty:
+    hasil_text = ""
+    for i, row in hasil.iterrows():
+        optk = row["NAMA ILMIAH/SINONIM/KLASIFIK ASI/ NAMA UMUM (SCIENTIFIC NAME/SYNONIM/TAXON/COMMON NAME)"]
+        inang = row["INANG/HOST"]
+        media = row["MEDIA PEMBAWA/PATHWAY"]
+        daerah = row["DAERAH SEBAR/GEOGRAPHICAL DISTRIBUTION"]
+
+        # Buat hyperlink ke Google Search
+        optk_hyperlink = f"https://www.google.com/search?q={optk.replace(' ', '+')}"
+
+        hasil_text += (
+            f"[{optk}]({optk_hyperlink})\n"
+            f"Host: {inang}\n"
+            f"Pathway: {media}\n"
+            f"Distribution: {daerah}\n\n"
         )
 
-    else:
-        st.warning("Tidak ditemukan hasil yang cocok.")
+    # Konversi ke bytes untuk download
+    hasil_bytes = hasil_text.encode('utf-8')
+    b64 = base64.b64encode(hasil_bytes).decode()
+    href = f'<a href="data:file/txt;base64,{b64}" download="hasil_pencarian.txt">📥 Download Hasil Pencarian</a>'
+    st.markdown(href, unsafe_allow_html=True)
+
