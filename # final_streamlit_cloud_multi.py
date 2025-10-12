@@ -19,10 +19,10 @@ st.markdown("""
         background: linear-gradient(180deg, #0097b2, #38b6ff);
     }
     h1 {
-      color: #ffffff;  /* putih bersih */
+      color: #b22222;  /* firebrick red */
     text-align: center;
     font-size: 2.3em;
-    text-shadow: 2px 2px 4px #000000; /* bayangan hitam lembut */
+    text-shadow: 1px 1px 3px #ffe4e1; /* bayangan lembut merah muda */
     margin-bottom: 0.2em;
     }
     .subtitle {
@@ -149,6 +149,7 @@ if st.button("🔍 Cari"):
         )
     else:
         st.warning("Tidak ditemukan hasil yang cocok.")
+
 
 
 
