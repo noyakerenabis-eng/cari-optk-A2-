@@ -76,22 +76,56 @@ if st.button("🔍 Cari"):
             hasil.append(rec)
 
     # === 7. Deteksi kategori organisme ===
-    kategori_map = {
-        "Serangga": ["Coleoptera", "Lepidoptera", "Diptera", "Hemiptera", "Insecta", "beetle", "moth", "fly"],
-        "Virus": ["virus", "viroid"],
-        "Bakteri": ["bacterium", "bacteria", "Ralstonia", "Xanthomonas", "Erwinia"],
-        "Jamur": ["Fusarium", "Phytophthora", "Cercospora", "Colletotrichum", "Puccinia"],
-        "Nematoda": ["Meloidogyne", "Heterodera", "Pratylenchus", "nematode"],
-        "Gulma": ["weed", "Amaranthus", "Avena", "Cyperus"]
-    }
-
-    def deteksi_kategori(teks):
-        for kategori, keywords in kategori_map.items():
-            for k in keywords:
-                if re.search(rf"\b{k}\b", teks, re.IGNORECASE):
-                    return kategori
-        return "Lainnya"
-
+   kategori_optk = {
+    "Serangga": [
+        "Coleoptera", "Lepidoptera", "Diptera", "Hemiptera", "Hymenoptera", 
+        "Thysanoptera", "Orthoptera", "Isoptera", "Insecta",
+        "beetle", "weevil", "borer", "bug", "hopper", "moth", "fly", "thrips", "grasshopper"
+    ],
+    "Virus": [
+        "virus", "viroid", "begomovirus", "tospovirus", "potyvirus", "mosaic", "wilt virus"
+    ],
+    "Bakteri": [
+        "bacterium", "bacteria", "Ralstonia", "Xanthomonas", "Erwinia", 
+        "Pseudomonas", "Clavibacter", "Agrobacterium", "Burkholderia", "Curtobacterium"
+    ],
+    "Jamur": [
+        "Fusarium", "Phytophthora", "Cercospora", "Colletotrichum", "Puccinia",
+        "Alternaria", "Aspergillus", "Botrytis", "Rhizoctonia", "Sclerotium",
+        "Pythium", "Penicillium", "Verticillium", "Ustilago", "Gloeocercospora",
+        "Pachymetra", "Helminthosporium", "Curvularia", "Trichoderma"
+    ],
+    "Nematoda": [
+        "Meloidogyne", "Heterodera", "Globodera", "Pratylenchus", 
+        "Radopholus", "Ditylenchus", "Tylenchulus", "nematode"
+    ],
+    "Gulma": [
+        "weed", "Amaranthus", "Avena", "Cyperus", "Eichhornia", "Imperata",
+        "Digitaria", "Rhamphicarpa", "Striga", "Sorghum halepense", "Parthenium",
+        "Chromolaena", "Lantana", "Mikania", "Pistia"
+    ],
+    "Tungau": [
+        "Acarina", "Tetranychus", "mite", "Brevipalpus", "Panonychus", "Phyllocoptruta"
+    ],
+    "Siput": [
+        "Achatina", "Achatinidae", "snail", "slug", "Lissachatina", "Pomacea"
+    ],
+    "Serangga Penggerek Batang": [
+        "borer", "stem borer", "Rhynchophorus", "Oryctes", "Sphenophorus"
+    ],
+    "Serangga Penghisap": [
+        "Aphis", "Bemisia", "Myzus", "Planococcus", "Coccus", "Pseudococcus"
+    ],
+    "Protozoa": [
+        "Phytomyxea", "Plasmodiophora", "Spongospora"
+    ],
+    "Fitoplasma": [
+        "phytoplasma", "mycoplasma", "spiroplasma"
+    ],
+    "Lainnya": [
+        "unknown", "unidentified", "miscellaneous"
+    ]
+}
     # === 8. Tampilkan hasil terkelompok ===
     if hasil:
         st.success(f"Ditemukan {len(hasil)} record pada OPTK {jenis_optk}.")
@@ -151,3 +185,4 @@ if st.button("🔍 Cari"):
 
     else:
         st.warning(f"Tidak ditemukan hasil yang cocok pada OPTK {jenis_optk}.")
+
