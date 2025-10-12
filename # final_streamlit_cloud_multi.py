@@ -92,6 +92,7 @@ label_style = """
     font-size: 12px;
     font-family: 'Times New Roman', serif;
     margin-bottom: 0px;          /* Hilangkan jarak dengan kolom input */
+    padding-bottom: 0px !important;
 }
 </style>
 """
@@ -169,6 +170,7 @@ if st.button("🔍 Cari"):
         )
     else:
         st.warning("Tidak ditemukan hasil yang cocok.")
+
 
 
 
