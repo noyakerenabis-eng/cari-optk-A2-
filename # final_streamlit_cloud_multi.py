@@ -92,10 +92,8 @@ label_style = """
 
 st.markdown(label_style.format("Masukkan kata untuk Inang / Host (pisahkan koma jika lebih dari satu)"), unsafe_allow_html=True)
 kata_inang = st.text_input(" ", key="inang")
-
 st.markdown(label_style.format("Masukkan kata untuk Daerah Sebar (pisahkan koma jika lebih dari satu)"), unsafe_allow_html=True)
 kata_daerah = st.text_input(" ", key="daerah")
-
 st.markdown(label_style.format("Masukkan kata untuk Media Pembawa / Pathway (pisahkan koma jika lebih dari satu)"), unsafe_allow_html=True)
 kata_media = st.text_input(" ", key="media")
 
@@ -161,6 +159,7 @@ if st.button("🔍 Cari"):
         )
     else:
         st.warning("Tidak ditemukan hasil yang cocok.")
+
 
 
 
