@@ -9,7 +9,7 @@ st.set_page_config(page_title="Pencarian OPTK A2 Berdasarkan Inang/Daerah/Media 
 st.markdown("""
     <style>
     body {
-        background-color: #f9f4ec;
+        background-color: #1800ad;
         background-image: radial-gradient(#d2b48c 1px, transparent 1px);
         background-size: 40px 40px;
         font-family: 'Georgia', serif;
@@ -149,3 +149,4 @@ if st.button("🔍 Cari"):
         )
     else:
         st.warning("Tidak ditemukan hasil yang cocok.")
+
