@@ -83,19 +83,29 @@ if temp:
 
 st.write(f"Jumlah record: {len(records)}")
 
-# Input teks
-# === Input dengan gaya klasik elegan ===
+# === Input dengan gaya klasik elegan seragam ===
 label_style = """
-<p style='color:#f5deb3; font-weight:bold; font-size:16px;'>
-{}</p>
+<style>
+.label-classic {
+    color: white;                  /* Ganti ke 'red' kalau mau merah */
+    font-weight: bold;
+    font-size: 16px;
+    font-family: 'Times New Roman', serif;
+    margin-bottom: -10px;          /* Hilangkan jarak dengan kolom input */
+}
+</style>
 """
 
-st.markdown(label_style.format("Masukkan kata untuk Inang / Host (pisahkan koma jika lebih dari satu)"), unsafe_allow_html=True)
-kata_inang = st.text_input(" ", key="inang")
-st.markdown(label_style.format("Masukkan kata untuk Daerah Sebar (pisahkan koma jika lebih dari satu)"), unsafe_allow_html=True)
-kata_daerah = st.text_input(" ", key="daerah")
-st.markdown(label_style.format("Masukkan kata untuk Media Pembawa / Pathway (pisahkan koma jika lebih dari satu)"), unsafe_allow_html=True)
-kata_media = st.text_input(" ", key="media")
+st.markdown(label_style, unsafe_allow_html=True)
+
+st.markdown("<p class='label-classic'>Masukkan kata untuk Inang / Host (pisahkan koma jika lebih dari satu)</p>", unsafe_allow_html=True)
+kata_inang = st.text_input("", key="inang")
+
+st.markdown("<p class='label-classic'>Masukkan kata untuk Daerah Sebar (pisahkan koma jika lebih dari satu)</p>", unsafe_allow_html=True)
+kata_daerah = st.text_input("", key="daerah")
+
+st.markdown("<p class='label-classic'>Masukkan kata untuk Media Pembawa / Pathway (pisahkan koma jika lebih dari satu)</p>", unsafe_allow_html=True)
+kata_media = st.text_input("", key="media")
 
 
 # Tombol cari
@@ -159,6 +169,7 @@ if st.button("🔍 Cari"):
         )
     else:
         st.warning("Tidak ditemukan hasil yang cocok.")
+
 
 
 
