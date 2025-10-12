@@ -4,7 +4,7 @@ import re
 
 # Konfigurasi halaman
 st.set_page_config(page_title="Pencarian OPTK A2 Berdasarkan Inang/Daerah/Media by Noya", layout="wide")
-color: #1800ad
+
 # CSS tema klasik
 st.markdown("""
     <style>
@@ -19,7 +19,7 @@ st.markdown("""
         background: linear-gradient(180deg, #0097b2, #38b6ff);
     }
     h1 {
-        color: #ff3131;
+        color: #ffffff;
         text-align: center;
         font-size: 2.3em;
         text-shadow: 1px 1px 2px #d2b48c;
@@ -149,6 +149,7 @@ if st.button("🔍 Cari"):
         )
     else:
         st.warning("Tidak ditemukan hasil yang cocok.")
+
 
 
 
