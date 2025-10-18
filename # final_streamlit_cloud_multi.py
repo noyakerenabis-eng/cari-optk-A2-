@@ -6,7 +6,7 @@ import requests
 import time
 
 # === 1. Konfigurasi halaman ===
-st.set_page_config(page_title="Pencarian & Klasifikasi OPTK A1/A2 by Noya", layout="wide")
+st.set_page_config(page_title="Pencarian & Klasifikasi OPTK A1/A2", layout="wide")
 
 st.title("🔎 Pencarian & Klasifikasi OPTK A1 / A2 Berdasarkan Inang / Daerah / Media")
 st.markdown("**Enhanced with GBIF Taxonomy • by Noya & ChatGPT**")
@@ -55,14 +55,14 @@ def buat_regex_multi(kata_input):
         return [re.compile(rf"\b{re.escape(k)}\b", re.IGNORECASE) for k in kata_list]
     return []
 
-# === Fungsi deteksi kategori lokal (regex) ===
+# === Fungsi deteksi kategori lokal (regex fallback) ===
 kategori_optk = {
     "Serangga": [
         "Coleoptera", "Lepidoptera", "Diptera", "Hemiptera", "Hymenoptera",
         "Insecta", "beetle", "weevil", "borer", "bug", "hopper", "moth", "fly", "thrips"
     ],
     "Virus": ["virus", "viroid", "begomovirus", "tospovirus", "potyvirus", "mosaic"],
-    "Bakteri": ["bacterium", "bacteria", "Ralstonia", "Xanthomonas", "Erwinia", "Pseudomonas"],
+    "Bakteri": ["bacterium", "bacteria", "Ralstonia", "Xanthomonas", "Erwinia", "Pseudomonas", "Phytoplasma"],
     "Jamur": ["Fusarium", "Phytophthora", "Cercospora", "Colletotrichum", "Rhizoctonia"],
     "Nematoda": ["Meloidogyne", "Heterodera", "Globodera", "Pratylenchus", "Radopholus"],
     "Tungau": ["Acarina", "Tetranychus", "mite", "Brevipalpus"],
@@ -90,8 +90,16 @@ def deteksi_kategori_gbif(nama):
             kingdom = hasil.get("kingdom", "").lower()
             kelas = hasil.get("class", "").lower()
             phylum = hasil.get("phylum", "").lower()
+            canonical = hasil.get("canonicalName", "").lower()
 
-            if "fungi" in kingdom:
+            # PERBAIKAN KHUSUS UNTUK FITOPLASMA / BAKTERI LAIN
+            if "phytoplasma" in canonical or "candidatus" in canonical:
+                return "Bakteri"
+            if "bacteria" in kingdom:
+                return "Bakteri"
+            elif "virus" in kingdom:
+                return "Virus"
+            elif "fungi" in kingdom:
                 return "Jamur"
             elif "animalia" in kingdom:
                 if "insecta" in kelas:
@@ -102,10 +110,6 @@ def deteksi_kategori_gbif(nama):
                     return "Nematoda"
                 else:
                     return "Hewan Lain"
-            elif "bacteria" in kingdom:
-                return "Bakteri"
-            elif "virus" in kingdom:
-                return "Virus"
             elif "plantae" in kingdom:
                 return "Tumbuhan"
             else:
@@ -168,9 +172,9 @@ if st.button("🔍 Jalankan Pencarian"):
             })
 
             progress.progress(i / total)
-            time.sleep(0.5)
+            time.sleep(0.3)  # biar ada progress bar visible
 
-        # === Tampilkan hasil ===
+        # === Tampilkan hasil per kategori ===
         for kategori, daftar in hasil_per_kategori.items():
             st.markdown(f"### 🧬 {kategori} ({len(daftar)} hasil)")
             for teks in daftar:
@@ -188,7 +192,7 @@ if st.button("🔍 Jalankan Pencarian"):
         st.download_button(
             label=f"💾 Download Hasil OPTK {jenis_optk} (CSV)",
             data=output.getvalue(),
-            file_name=f"hasil_OPTKA{jenis_optk}_GBIF.csv",
+            file_name=f"hasil_OPTKA{jenis_optk}_GBIF_fix.csv",
             mime="text/csv"
         )
     else:
