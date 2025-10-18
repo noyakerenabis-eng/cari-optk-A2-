@@ -1,4 +1,4 @@
-# final_streamlit_csv_group_by_range.py
+# final_streamlit_csv_group_by_range_final.py
 import streamlit as st
 import re
 import csv
@@ -82,7 +82,7 @@ if st.button("🔍 Cari"):
             "Siput": (280, 293),
             "Nematoda": (295, 360),
             "Gulma parasitik": (362, 392),
-            "Gulma non parasitik": (398, 405),
+            "Gulma non parasitik": (398, 404),
             "Cendawan": (406, 538),
             "Bakteri": (540, 594),
             "Mollicute": (596, 610),
@@ -144,13 +144,20 @@ if st.button("🔍 Cari"):
                 "Google": google_link
             })
 
+        # === tampil hasil tanpa duplikasi kategori ===
         for kategori, daftar in hasil_per_kategori.items():
             st.markdown(f"### 🧬 {kategori} ({len(daftar)} hasil)")
+
+            daftar_bersih = []
             for teks in daftar:
-                kata_split = teks.split()
-                target = " ".join(kata_split[:3])
-                link = f"https://www.google.com/search?q={target.replace(' ', '+')}"
-                st.markdown(f"- [{target}]({link})", unsafe_allow_html=True)
+                nama = re.sub(r"^\d+\.\s*", "", teks).strip()
+                nama = " ".join(nama.split()[:3])  # ambil 3 kata pertama
+                if nama not in daftar_bersih:
+                    daftar_bersih.append(nama)
+
+            for nama in daftar_bersih:
+                link = f"https://www.google.com/search?q={nama.replace(' ', '+')}"
+                st.markdown(f"- [{nama}]({link})", unsafe_allow_html=True)
             st.markdown("---")
 
         # === 10. Download CSV ===
@@ -167,4 +174,3 @@ if st.button("🔍 Cari"):
         )
     else:
         st.warning(f"Tidak ditemukan hasil yang cocok pada OPTK {jenis_optk}.")
-
