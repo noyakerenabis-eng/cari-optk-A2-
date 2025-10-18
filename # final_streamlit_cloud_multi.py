@@ -82,7 +82,7 @@ if st.button("🔍 Cari"):
             "Siput": (280, 293),
             "Nematoda": (295, 360),
             "Gulma parasitik": (362, 392),
-            "Gulma non parasitik": (398, 404),
+            "Gulma non parasitik": (398, 405),
             "Cendawan": (406, 538),
             "Bakteri": (540, 594),
             "Mollicute": (596, 610),
@@ -167,3 +167,4 @@ if st.button("🔍 Cari"):
         )
     else:
         st.warning(f"Tidak ditemukan hasil yang cocok pada OPTK {jenis_optk}.")
+
