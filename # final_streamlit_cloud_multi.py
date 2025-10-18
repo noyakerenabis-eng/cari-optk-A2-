@@ -1,4 +1,4 @@
-# final_streamlit_csv_group_by_range_final.py
+# final_streamlit_csv_group_by_range_final_clean.py
 import streamlit as st
 import re
 import csv
@@ -82,7 +82,7 @@ if st.button("🔍 Cari"):
             "Siput": (280, 293),
             "Nematoda": (295, 360),
             "Gulma parasitik": (362, 392),
-            "Gulma non parasitik": (398, 404),
+            "Gulma non parasitik": (398, 405),
             "Cendawan": (406, 538),
             "Bakteri": (540, 594),
             "Mollicute": (596, 610),
@@ -144,21 +144,16 @@ if st.button("🔍 Cari"):
                 "Google": google_link
             })
 
-        # === tampil hasil tanpa duplikasi kategori ===
+        # === Tampilan hasil (kategori kecil dan rapi) ===
         for kategori, daftar in hasil_per_kategori.items():
-            st.markdown(f"### 🧬 {kategori} ({len(daftar)} hasil)")
+            st.markdown(f"<small>🧬 <b>{kategori}</b> ({len(daftar)} hasil)</small>", unsafe_allow_html=True)
 
-            daftar_bersih = []
             for teks in daftar:
-                nama = re.sub(r"^\d+\.\s*", "", teks).strip()
-                nama = " ".join(nama.split()[:3])  # ambil 3 kata pertama
-                if nama not in daftar_bersih:
-                    daftar_bersih.append(nama)
-
-            for nama in daftar_bersih:
-                link = f"https://www.google.com/search?q={nama.replace(' ', '+')}"
-                st.markdown(f"- [{nama}]({link})", unsafe_allow_html=True)
-            st.markdown("---")
+                kata_split = teks.split()
+                target = " ".join(kata_split[:3])
+                link = f"https://www.google.com/search?q={target.replace(' ', '+')}"
+                st.markdown(f"<small>• <a href='{link}' target='_blank'>{target}</a></small>", unsafe_allow_html=True)
+            st.markdown("<hr style='margin-top:5px;margin-bottom:10px;'>", unsafe_allow_html=True)
 
         # === 10. Download CSV ===
         output = io.StringIO()
