@@ -78,10 +78,11 @@ def deteksi_kategori_lokal(teks):
                 return kategori
     return "Tidak Terklasifikasi"
 
+# === Fungsi deteksi via GBIF API ===
 def deteksi_kategori_gbif(nama):
     try:
         url = f"https://api.gbif.org/v1/species?name={nama}"
-        r = requests.get(url, timeout=10)
+        r = requests.get(url, timeout=8)
         data = r.json()
 
         if "results" in data and len(data["results"]) > 0:
@@ -89,16 +90,8 @@ def deteksi_kategori_gbif(nama):
             kingdom = hasil.get("kingdom", "").lower()
             kelas = hasil.get("class", "").lower()
             phylum = hasil.get("phylum", "").lower()
-            canonical = hasil.get("canonicalName", "").lower()
 
-            # --- PERBAIKAN UNTUK PHYTOSPLASMA DAN BAKTERI LAIN ---
-            if "phytoplasma" in canonical:
-                return "Bakteri"
-            if "bacteria" in kingdom:
-                return "Bakteri"
-            elif "virus" in kingdom:
-                return "Virus"
-            elif "fungi" in kingdom:
+            if "fungi" in kingdom:
                 return "Jamur"
             elif "animalia" in kingdom:
                 if "insecta" in kelas:
@@ -109,14 +102,18 @@ def deteksi_kategori_gbif(nama):
                     return "Nematoda"
                 else:
                     return "Hewan Lain"
+            elif "bacteria" in kingdom:
+                return "Bakteri"
+            elif "virus" in kingdom:
+                return "Virus"
             elif "plantae" in kingdom:
                 return "Tumbuhan"
             else:
                 return "Tidak Terklasifikasi"
         else:
-            return "Nama Tidak Ditemukan"
-    except Exception as e:
-        return f"Error: {e}"
+            return None
+    except Exception:
+        return None
 
 # === 6. Tombol cari ===
 if st.button("🔍 Jalankan Pencarian"):
@@ -196,4 +193,3 @@ if st.button("🔍 Jalankan Pencarian"):
         )
     else:
         st.warning("Tidak ditemukan hasil yang cocok.")
-
