@@ -1,175 +1,108 @@
-# === final_optk_dual_tab_by_noya.py ===
 import streamlit as st
-import re
-import csv
-import io
+import pandas as pd
 
-# === 1. Konfigurasi halaman ===
-st.set_page_config(page_title="Pencarian & Target OPTK A1/A2 by Noya", layout="wide")
+st.set_page_config(page_title="📋 Pencarian OPTK & Target Sebar", layout="wide")
 
-st.title("🌿 Sistem Pencarian & Analisis Target OPTK A1/A2")
-st.markdown("**by: Noya**")
-st.markdown("---")
+st.title("🪲 Sistem Pencarian & Analisis Target OPTK")
 
-# === Tabs ===
-tab1, tab2 = st.tabs(["🔍 Pencarian OPTK", "🎯 Target OPTK"])
+# === Tabs utama ===
+tab1, tab2 = st.tabs(["🔍 Pencarian OPTK Berdasarkan Nama", "🎯 Analisis Target OPTK"])
 
-# === Pemetaan kategori per rentang baris ===
-kategori_map_A1 = {
-    "Serangga": (2, 237),
-    "Tungau": (239, 262),
-    "Keong": (264, 278),
-    "Siput": (280, 293),
-    "Nematoda": (295, 360),
-    "Gulma parasitik": (362, 392),
-    "Gulma non parasitik": (398, 405),
-    "Cendawan": (406, 538),
-    "Bakteri": (540, 594),
-    "Mollicute": (596, 610),
-    "Virus": (612, 732),
-    "Viroid": (733, 739)
+# === Fungsi bantu kategori A1 dan A2 ===
+def get_category(no, tipe):
+    if tipe == "A1":
+        if 2 <= no <= 237: return "Serangga"
+        elif 239 <= no <= 262: return "Tungau"
+        elif 264 <= no <= 278: return "Keong"
+        elif 280 <= no <= 293: return "Siput"
+        elif 295 <= no <= 360: return "Nematoda"
+        elif 362 <= no <= 392: return "Gulma parasitik"
+        elif 398 <= no <= 404: return "Gulma non parasitik"
+        elif 406 <= no <= 538: return "Cendawan"
+        elif 540 <= no <= 594: return "Bakteri"
+        elif 596 <= no <= 610: return "Mollicute"
+        elif 612 <= no <= 732: return "Virus"
+        elif 733 <= no <= 739: return "Viroid"
+    elif tipe == "A2":
+        if 2 <= no <= 50: return "Serangga"
+        elif 52 <= no <= 58: return "Tungau"
+        elif 60 <= no <= 61: return "Keong"
+        elif 63 <= no <= 72: return "Nematoda"
+        elif 74 <= no <= 77: return "Gulma non parasitik"
+        elif 79 <= no <= 108: return "Cendawan"
+        elif 110 <= no <= 123: return "Bakteri"
+        elif 125 <= no <= 136: return "Virus"
+        elif no == 138: return "Viroid"
+    return "-"
+
+# === Simulasi DataFrame ===
+data = {
+    "No": [2, 3, 60, 65, 80, 125, 733],
+    "Nama OPTK": ["Bactrocera dorsalis", "Bactrocera occipitalis", "Pomacea canaliculata",
+                  "Meloidogyne incognita", "Fusarium oxysporum", "Banana bunchy top virus", "Coconut cadang-cadang viroid"],
+    "Tipe": ["A1", "A1", "A1", "A1", "A1", "A1", "A1"],
+    "Inang": ["Mangga", "Mangga", "Padi", "Tomat", "Pisang", "Pisang", "Kelapa"],
+    "Daerah Sebar": ["Sumatera", "Jawa", "Sumatera", "Jawa", "Sulawesi", "Kalimantan", "Maluku"],
+    "Media Pembawa": ["Buah", "Buah", "Air", "Tanah", "Batang", "Daun", "Batang"]
 }
-kategori_map_A2 = {
-    "Serangga": (2, 50),
-    "Tungau": (52, 58),
-    "Keong": (60, 61),
-    "Nematoda": (63, 72),
-    "Gulma non parasitik": (74, 77),
-    "Cendawan": (79, 108),
-    "Bakteri": (110, 123),
-    "Virus": (125, 136),
-    "Viroid": (138, 138)
-}
+df = pd.DataFrame(data)
+df["Kategori"] = df.apply(lambda x: get_category(x["No"], x["Tipe"]), axis=1)
 
-# === Fungsi bantu umum ===
-def baca_file_optk(jenis):
-    file_map = {"A1": "teks_OPTKA1.txt", "A2": "teks_OPTKA2.txt"}
-    file_terpilih = file_map[jenis]
-    try:
-        with open(file_terpilih, "r", encoding="utf-8") as f:
-            lines = f.read().splitlines()
-    except FileNotFoundError:
-        st.error(f"File '{file_terpilih}' tidak ditemukan! Pastikan file ada di folder yang sama.")
-        st.stop()
-
-    records = []
-    temp = ""
-    for line in lines:
-        line = line.strip()
-        if re.match(r"^\d+\.", line):
-            if temp:
-                records.append(temp)
-            temp = line
-        else:
-            temp += " " + line
-    if temp:
-        records.append(temp)
-    return records
-
-def kategori_by_index(index, jenis):
-    if jenis == "A1":
-        kategori_map = kategori_map_A1
-    else:
-        kategori_map = kategori_map_A2
-    no = index + 2
-    for kategori, (start, end) in kategori_map.items():
-        if start <= no <= end:
-            return kategori
-    return "Tidak Terklasifikasi"
-
-def buat_regex_multi(kata_input):
-    if kata_input:
-        kata_list = [k.strip() for k in kata_input.split(",") if k.strip()]
-        return [re.compile(rf"\b{re.escape(k)}\b", re.IGNORECASE) for k in kata_list]
-    return []
-
-def cocok(pattern_list, teks):
-    if not pattern_list:
-        return True
-    return any(p.search(teks) for p in pattern_list)
-
-# ============================================================
-# === TAB 1: PENCARIAN OPTK
-# ============================================================
+# === TAB 1: Pencarian OPTK ===
 with tab1:
-    jenis_optk = st.selectbox("Pilih jenis OPTK:", ["A1", "A2"], index=1, key="optk_search")
-    records = baca_file_optk(jenis_optk)
-    st.write(f"📂 Jumlah record dalam {jenis_optk}: {len(records)}")
-    st.markdown("---")
+    st.subheader("🔎 Pencarian Berdasarkan Nama OPTK")
+    keyword = st.text_input("Masukkan nama OPTK (misal: *Bactrocera dorsalis*):")
 
-    kata_inang = st.text_input("🪴 Inang / Host (pisahkan koma jika lebih dari satu)")
-    kata_daerah = st.text_input("📍 Daerah Sebar (pisahkan koma jika lebih dari satu)")
-    kata_media = st.text_input("📦 Media Pembawa / Pathway (opsional)")
-
-    if st.button("🔍 Cari", key="cari_optk"):
-        pattern_inang = buat_regex_multi(kata_inang)
-        pattern_daerah = buat_regex_multi(kata_daerah)
-        pattern_media = buat_regex_multi(kata_media)
-
-        hasil = [
-            rec for rec in records
-            if cocok(pattern_inang, rec) and cocok(pattern_daerah, rec) and cocok(pattern_media, rec)
-        ]
-
-        if hasil:
-            st.success(f"Ditemukan {len(hasil)} record pada OPTK {jenis_optk}.")
-            hasil_per_kategori = {}
-            for rec in hasil:
-                kategori = kategori_by_index(records.index(rec), jenis_optk)
-                hasil_per_kategori.setdefault(kategori, []).append(rec)
-
-            for kategori, daftar in hasil_per_kategori.items():
-                st.markdown(f"### 🧬 {kategori} ({len(daftar)} hasil)")
-                for teks in daftar:
-                    target = " ".join(re.sub(r"^\d+\.\s*", "", teks).split()[:3])
-                    link = f"https://www.google.com/search?q={target.replace(' ', '+')}"
-                    st.markdown(f"- [{target}]({link})", unsafe_allow_html=True)
-                st.markdown("---")
+    if keyword:
+        results = df[df["Nama OPTK"].str.contains(keyword, case=False, na=False)]
+        if not results.empty:
+            grouped = results.groupby("Kategori")
+            for kategori, group in grouped:
+                st.markdown(f"### 🧩 {kategori}")
+                st.dataframe(group[["Nama OPTK", "Inang", "Daerah Sebar", "Media Pembawa"]].drop_duplicates())
         else:
-            st.warning(f"Tidak ditemukan hasil pada OPTK {jenis_optk}.")
+            st.warning("❌ Tidak ditemukan hasil yang cocok.")
 
-# ============================================================
-# === TAB 2: TARGET OPTK
-# ============================================================
+# === TAB 2: Analisis Target OPTK ===
 with tab2:
-    jenis_optk2 = st.selectbox("Pilih jenis OPTK:", ["A1", "A2"], index=1, key="optk_target")
-    records2 = baca_file_optk(jenis_optk2)
+    st.subheader("🎯 Analisis Target OPTK Berdasarkan Sebaran")
+    inang = st.text_input("Masukkan nama inang:")
+    media = st.text_input("Masukkan media pembawa (opsional):")
+    daerah_asal = st.text_input("Masukkan daerah sebar **asal**:")
+    daerah_tujuan = st.text_input("Masukkan daerah sebar **tujuan**:")
 
-    st.subheader("Masukkan Data Analisis Target")
-    inang = st.text_input("🪴 Inang / Host (wajib)", key="host_target")
-    daerah_asal = st.text_input("📍 Daerah Sebar Asal (wajib)", key="asal_target")
-    daerah_tujuan = st.text_input("📍 Daerah Sebar Tujuan (wajib)", key="tujuan_target")
-    media = st.text_input("📦 Media Pembawa / Pathway (opsional)", key="media_target")
-
-    if st.button("🎯 Analisis Target", key="analisis_target"):
+    if st.button("Analisis Target"):
         if not inang or not daerah_asal or not daerah_tujuan:
-            st.error("⚠️ Harap isi Inang, Daerah Asal, dan Daerah Tujuan.")
-            st.stop()
-
-        pattern_inang = buat_regex_multi(inang)
-        pattern_media = buat_regex_multi(media)
-
-        hasil_asal = [
-            r for r in records2
-            if cocok(pattern_inang, r) and cocok(pattern_media, r) and re.search(daerah_asal, r, re.IGNORECASE)
-        ]
-        hasil_tujuan = [
-            r for r in records2
-            if cocok(pattern_inang, r) and cocok(pattern_media, r) and re.search(daerah_tujuan, r, re.IGNORECASE)
-        ]
-
-        if not hasil_asal:
-            st.warning("Tidak ditemukan OPTK di daerah asal berdasarkan inang yang dimasukkan.")
+            st.warning("⚠️ Harap isi *inang*, *daerah asal*, dan *daerah tujuan* minimal.")
         else:
-            optk_asal = { " ".join(re.sub(r"^\d+\.\s*", "", h).split()[:3]) for h in hasil_asal }
-            optk_tujuan = { " ".join(re.sub(r"^\d+\.\s*", "", h).split()[:3]) for h in hasil_tujuan }
+            # Filter berdasarkan inang dan (opsional) media
+            base_filter = df[df["Inang"].str.contains(inang, case=False, na=False)]
+            if media:
+                base_filter = base_filter[base_filter["Media Pembawa"].str.contains(media, case=False, na=False)]
 
-            target_optk = optk_asal - optk_tujuan  # beda dari tujuan
-            if target_optk:
-                st.success(f"🎯 Ditemukan {len(target_optk)} target OPTK potensial:")
-                for t in sorted(target_optk):
-                    idx = next((i for i, r in enumerate(records2) if t in r), None)
-                    kategori = kategori_by_index(idx, jenis_optk2) if idx is not None else "-"
-                    st.markdown(f"- **{t}** ({kategori})")
+            asal = base_filter[base_filter["Daerah Sebar"].str.contains(daerah_asal, case=False, na=False)]
+            tujuan = base_filter[base_filter["Daerah Sebar"].str.contains(daerah_tujuan, case=False, na=False)]
+
+            if asal.empty:
+                st.info("ℹ️ Tidak ditemukan OPTK di daerah asal.")
             else:
-                st.info("✅ Tidak ada target. Semua OPTK dari daerah asal juga ditemukan di daerah tujuan.")
+                target_list = []
+                for optk in asal["Nama OPTK"].unique():
+                    if optk not in tujuan["Nama OPTK"].unique():
+                        kategori = asal[asal["Nama OPTK"] == optk]["Kategori"].iloc[0]
+                        target_list.append((optk, kategori))
+
+                if target_list:
+                    st.success("🎯 **Ada target OPTK:**")
+                    for t in target_list:
+                        st.markdown(f"- {t[0]} *(Kategori: {t[1]})*")
+                else:
+                    st.error("❌ Tidak ada target. Daerah tujuan sudah memiliki semua OPTK dari asal.")
+
+            # Tampilkan hasil pengelompokan kategori
+            grouped = base_filter.groupby("Kategori")
+            st.markdown("---")
+            st.markdown("### 📂 Pengelompokan OPTK Berdasarkan Kategori")
+            for kategori, group in grouped:
+                st.markdown(f"#### 🧩 {kategori}")
+                st.dataframe(group[["Nama OPTK", "Inang", "Daerah Sebar", "Media Pembawa"]].drop_duplicates())
