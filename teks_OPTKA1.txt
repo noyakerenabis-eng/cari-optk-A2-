@@ -29481,7 +29481,7 @@ yang diterbitkan oleh Balai Besar Sertifikasi Elektronik (BSrE), Badan Siber dan
 882255 // 11..113355
 
 --- Halaman 824 ---
-2 Avocado sunblotch Persea americana (alpukat, batang (stems (above Africa: Ghana, South Africa
+2. Avocado sunblotch Persea americana (alpukat, batang (stems (above Africa: Ghana, South Africa
 avsunviroid (ASBVd); avocado) ground), trunks, America: Guatemala, Mexico,
 (Syn. avocado sunblotch branches), buah Peru, USA, Venezuela
 viroid); (fruits), bunga Asia: Israel
@@ -29497,7 +29497,7 @@ kayu (barks), kultur
 jaringan (tissue
 culture), tunas
 (shoots, buds)
-3 Coconut cadang-cadang Adonidia merrillii (Manila akar (roots), batang Asia: Malaysia, Philippines
+3. Coconut cadang-cadang Adonidia merrillii (Manila akar (roots), batang Asia: Malaysia, Philippines
 cocadviroid (CCCVd); palm), Areca catechu (betel (stems (above Oceania: Solomon Islands
 (Syn. coconut cadang- nut palm), Arenga pinnata ground), trunks,
 cadang viroid, palm cadang- (aren, sugar palm), Borassus branches), biji (true
@@ -29667,4 +29667,5 @@ yang diterbitkan oleh Balai Besar Sertifikasi Elektronik (BSrE), Badan Siber dan
 Dokumen ini telah ditandatangani secara elektronik menggunakan sertifikat elektronik
 yang diterbitkan oleh Balai Besar Sertifikasi Elektronik (BSrE), Badan Siber dan Sandi Negara
 883322 // 11..113355
+
 
