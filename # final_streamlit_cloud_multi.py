@@ -2,17 +2,15 @@ import streamlit as st
 import re
 import csv
 import io
-import requests
-import time
 
 # === 1. Konfigurasi halaman ===
-st.set_page_config(page_title="Pencarian & Klasifikasi OPTK A1/A2", layout="wide")
+st.set_page_config(page_title="Daftar OPTK & Kategori", layout="wide")
 
-st.title("🔎 Pencarian & Klasifikasi OPTK A1 / A2 Berdasarkan Inang / Daerah / Media")
-st.markdown("**Enhanced with GBIF Taxonomy • by Noya & ChatGPT**")
+st.title("📋 Daftar OPTK & Kategori")
+st.markdown("**Simplified version by Noya**")
 st.markdown("---")
 
-# === 2. Pilihan jenis OPTK ===
+# === 2. Pilih file A1 / A2 ===
 jenis_optk = st.selectbox("Pilih jenis OPTK:", ["A1", "A2"], index=1)
 file_map = {"A1": "teks_OPTKA1.txt", "A2": "teks_OPTKA2.txt"}
 file_terpilih = file_map[jenis_optk]
@@ -22,10 +20,10 @@ try:
     with open(file_terpilih, "r", encoding="utf-8") as f:
         lines = f.read().splitlines()
 except FileNotFoundError:
-    st.error(f"File '{file_terpilih}' tidak ditemukan! Pastikan file ada di folder yang sama.")
+    st.error(f"File '{file_terpilih}' tidak ditemukan!")
     st.stop()
 
-# === 4. Gabungkan baris jadi record ===
+# === 4. Gabungkan baris menjadi record ===
 records = []
 temp = ""
 for line in lines:
@@ -39,161 +37,68 @@ for line in lines:
 if temp:
     records.append(temp)
 
-st.write(f"📂 Jumlah record dalam {jenis_optk}: {len(records)}")
+st.write(f"📂 Jumlah record: {len(records)}")
 st.markdown("---")
 
-# === 5. Input pencarian ===
-st.subheader("Masukkan kata pencarian")
-kata_inang = st.text_input("🪴 Inang / Host (pisahkan koma jika lebih dari satu)")
-kata_daerah = st.text_input("📍 Daerah Sebar (pisahkan koma jika lebih dari satu)")
-kata_media = st.text_input("📦 Media Pembawa / Pathway (pisahkan koma jika lebih dari satu)")
+# === 5. Input pencarian (opsional) ===
+kata_cari = st.text_input("🔎 Filter kata (optional, pisahkan koma jika lebih dari satu)")
 
-# === Fungsi bantu regex ===
 def buat_regex_multi(kata_input):
     if kata_input:
         kata_list = [k.strip() for k in kata_input.split(",") if k.strip()]
         return [re.compile(rf"\b{re.escape(k)}\b", re.IGNORECASE) for k in kata_list]
     return []
 
-# === Fungsi deteksi kategori lokal (regex fallback) ===
+pattern_list = buat_regex_multi(kata_cari)
+
+# === 6. Kategori default (regex sederhana) ===
 kategori_optk = {
-    "Serangga": [
-        "Coleoptera", "Lepidoptera", "Diptera", "Hemiptera", "Hymenoptera",
-        "Insecta", "beetle", "weevil", "borer", "bug", "hopper", "moth", "fly", "thrips"
-    ],
-    "Virus": ["virus", "viroid", "begomovirus", "tospovirus", "potyvirus", "mosaic"],
-    "Bakteri": ["bacterium", "bacteria", "Ralstonia", "Xanthomonas", "Erwinia", "Pseudomonas", "Phytoplasma"],
+    "Serangga": ["Coleoptera", "Lepidoptera", "Diptera", "Insecta", "beetle", "borer", "fly"],
+    "Virus": ["virus", "viroid", "begomovirus", "tospovirus"],
+    "Bakteri": ["bacterium", "bacteria", "Ralstonia", "Phytoplasma"],
     "Jamur": ["Fusarium", "Phytophthora", "Cercospora", "Colletotrichum", "Rhizoctonia"],
-    "Nematoda": ["Meloidogyne", "Heterodera", "Globodera", "Pratylenchus", "Radopholus"],
-    "Tungau": ["Acarina", "Tetranychus", "mite", "Brevipalpus"],
-    "Gulma": ["weed", "Amaranthus", "Avena", "Eichhornia", "Imperata", "Mikania"],
-    "Siput": ["Achatina", "snail", "slug", "Pomacea"],
-    "Fitoplasma": ["phytoplasma", "mycoplasma", "spiroplasma"]
+    "Nematoda": ["Meloidogyne", "Heterodera", "Pratylenchus"],
+    "Tungau": ["Acarina", "mite"],
+    "Gulma": ["weed", "Amaranthus", "Cyperus", "Mikania"],
+    "Siput": ["Achatina", "snail", "slug"]
 }
 
-def deteksi_kategori_lokal(teks):
+def deteksi_kategori(teks):
     for kategori, kata_list in kategori_optk.items():
         for kata in kata_list:
             if re.search(rf"\b{kata}\b", teks, re.IGNORECASE):
                 return kategori
-    return "Tidak Terklasifikasi"
+    return "Lainnya"
 
-# === Fungsi deteksi via GBIF API ===
-def deteksi_kategori_gbif(nama):
-    try:
-        url = f"https://api.gbif.org/v1/species?name={nama}"
-        r = requests.get(url, timeout=8)
-        data = r.json()
+# === 7. Proses record ===
+hasil_list = []
+for rec in records:
+    if pattern_list and not any(p.search(rec) for p in pattern_list):
+        continue
+    h_clean = re.sub(r"^\d+\.\s*", "", rec)
+    h_clean = re.sub(r"--- Halaman \d+ ---", "", h_clean)
+    h_clean = re.sub(r"Dokumen ini telah ditandatangani.*", "", h_clean)
+    h_clean = h_clean.strip()
+    target = " ".join(h_clean.split()[:3])
+    kategori = deteksi_kategori(h_clean)
+    hasil_list.append({"Nama/Target": target, "Kategori": kategori})
 
-        if "results" in data and len(data["results"]) > 0:
-            hasil = data["results"][0]
-            kingdom = hasil.get("kingdom", "").lower()
-            kelas = hasil.get("class", "").lower()
-            phylum = hasil.get("phylum", "").lower()
-            canonical = hasil.get("canonicalName", "").lower()
+# === 8. Tampilkan tabel ===
+if hasil_list:
+    st.write("### Hasil Daftar OPTK & Kategori")
+    st.table(hasil_list)
 
-            # PERBAIKAN KHUSUS UNTUK FITOPLASMA / BAKTERI LAIN
-            if "phytoplasma" in canonical or "candidatus" in canonical:
-                return "Bakteri"
-            if "bacteria" in kingdom:
-                return "Bakteri"
-            elif "virus" in kingdom:
-                return "Virus"
-            elif "fungi" in kingdom:
-                return "Jamur"
-            elif "animalia" in kingdom:
-                if "insecta" in kelas:
-                    return "Serangga"
-                elif "arachnida" in kelas:
-                    return "Tungau"
-                elif "nematoda" in phylum:
-                    return "Nematoda"
-                else:
-                    return "Hewan Lain"
-            elif "plantae" in kingdom:
-                return "Tumbuhan"
-            else:
-                return "Tidak Terklasifikasi"
-        else:
-            return None
-    except Exception:
-        return None
+    # Download CSV
+    output = io.StringIO()
+    writer = csv.DictWriter(output, fieldnames=["Nama/Target", "Kategori"])
+    writer.writeheader()
+    writer.writerows(hasil_list)
 
-# === 6. Tombol cari ===
-if st.button("🔍 Jalankan Pencarian"):
-    pattern_inang_list = buat_regex_multi(kata_inang)
-    pattern_daerah_list = buat_regex_multi(kata_daerah)
-    pattern_media_list = buat_regex_multi(kata_media)
-
-    hasil = []
-    for rec in records:
-        def cocok(pattern_list):
-            if not pattern_list:
-                return True
-            return any(p.search(rec) for p in pattern_list)
-        if cocok(pattern_inang_list) and cocok(pattern_daerah_list) and cocok(pattern_media_list):
-            hasil.append(rec)
-
-    if hasil:
-        st.success(f"Ditemukan {len(hasil)} record dalam OPTK {jenis_optk}. Memproses klasifikasi...")
-
-        hasil_per_kategori = {}
-        data_csv = []
-
-        progress = st.progress(0)
-        total = len(hasil)
-
-        for i, h in enumerate(hasil, start=1):
-            kata_split = h.split()
-            target = " ".join(kata_split[:3])
-            gbif_kategori = deteksi_kategori_gbif(target)
-            kategori = gbif_kategori if gbif_kategori else deteksi_kategori_lokal(h)
-
-            hasil_per_kategori.setdefault(kategori, []).append(h)
-
-            h_clean = re.sub(r"^\d+\.\s*", "", h)
-            h_clean = re.sub(r"--- Halaman \d+ ---", "", h_clean)
-            h_clean = re.sub(r"Dokumen ini telah ditandatangani.*", "", h_clean)
-            h_clean = h_clean.strip()
-
-            host = re.search(r"[Hh]ost[:：]\s*([^;]*)", h)
-            pathway = re.search(r"[Pp]athway[:：]\s*([^;]*)", h)
-            dist = re.search(r"[Dd]istribution[:：]\s*([^;]*)", h)
-            google_link = f"https://www.google.com/search?q={target.replace(' ', '+')}"
-
-            data_csv.append({
-                "No": i,
-                "Target": target,
-                "Kategori": kategori,
-                "Host": host.group(1).strip() if host else "-",
-                "Pathway": pathway.group(1).strip() if pathway else "-",
-                "Distribution": dist.group(1).strip() if dist else "-",
-                "Link Google": google_link
-            })
-
-            progress.progress(i / total)
-            time.sleep(0.3)  # biar ada progress bar visible
-
-        # === Tampilkan hasil per kategori ===
-        for kategori, daftar in hasil_per_kategori.items():
-            st.markdown(f"### 🧬 {kategori} ({len(daftar)} hasil)")
-            for teks in daftar:
-                target = " ".join(teks.split()[:3])
-                link = f"https://www.google.com/search?q={target.replace(' ', '+')}"
-                st.markdown(f"- [{target}]({link})", unsafe_allow_html=True)
-            st.markdown("---")
-
-        # === Download CSV ===
-        output = io.StringIO()
-        writer = csv.DictWriter(output, fieldnames=["No", "Target", "Kategori", "Host", "Pathway", "Distribution", "Link Google"])
-        writer.writeheader()
-        writer.writerows(data_csv)
-
-        st.download_button(
-            label=f"💾 Download Hasil OPTK {jenis_optk} (CSV)",
-            data=output.getvalue(),
-            file_name=f"hasil_OPTKA{jenis_optk}_GBIF_fix.csv",
-            mime="text/csv"
-        )
-    else:
-        st.warning("Tidak ditemukan hasil yang cocok.")
+    st.download_button(
+        label="💾 Download CSV",
+        data=output.getvalue(),
+        file_name=f"daftar_OPTKA{jenis_optk}.csv",
+        mime="text/csv"
+    )
+else:
+    st.warning("Tidak ada record yang cocok.")
