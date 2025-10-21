@@ -1,174 +1,123 @@
-# final_streamlit_optk_duatab.py
 import streamlit as st
-import re
+import pandas as pd
 import csv
 import io
+import re
 
-# === 1. Konfigurasi halaman ===
-st.set_page_config(page_title="Pencarian & Target OPTK A1/A2 by Noya", layout="wide")
+# =========================================
+# === Fungsi bantu
+# =========================================
+def buat_regex_multi(teks):
+    """Membuat pola regex dari input teks yang dipisahkan koma"""
+    if not teks:
+        return None
+    pola = "|".join([re.escape(t.strip()) for t in teks.split(",") if t.strip()])
+    return pola if pola else None
 
-st.title("🦋 Sistem Pencarian & Analisis Target OPTK A1 / A2")
-st.markdown("**by: Noya**")
-st.markdown("---")
-
-# === Tabs utama ===
-tab1, tab2 = st.tabs(["🔍 Pencarian OPTK", "🎯 Analisis Target OPTK"])
-
-# === Pilihan jenis OPTK ===
-jenis_optk = st.selectbox("Pilih jenis OPTK:", ["A1", "A2"], index=1)
-file_map = {"A1": "teks_OPTKA1.txt", "A2": "teks_OPTKA2.txt"}
-file_terpilih = file_map[jenis_optk]
-
-# === Baca file OPTK ===
-try:
-    with open(file_terpilih, "r", encoding="utf-8") as f:
-        lines = f.read().splitlines()
-except FileNotFoundError:
-    st.error(f"File '{file_terpilih}' tidak ditemukan!")
-    st.stop()
-
-# === Gabungkan baris jadi record ===
-records = []
-temp = ""
-for line in lines:
-    line = line.strip()
-    if re.match(r"^\d+\.", line):
-        if temp:
-            records.append(temp)
-        temp = line
-    else:
-        temp += " " + line
-if temp:
-    records.append(temp)
-
-# === Fungsi kategori ===
-def get_kategori_map(jenis_optk):
-    if jenis_optk == "A1":
-        return {
-            "Serangga": (2, 237),
-            "Tungau": (239, 262),
-            "Keong": (264, 278),
-            "Siput": (280, 293),
-            "Nematoda": (295, 360),
-            "Gulma parasitik": (362, 392),
-            "Gulma non parasitik": (398, 405),
-            "Cendawan": (406, 538),
-            "Bakteri": (540, 594),
-            "Mollicute": (596, 610),
-            "Virus": (612, 732),
-            "Viroid": (733, 739)
-        }
-    else:
-        return {
-            "Serangga": (2, 50),
-            "Tungau": (52, 58),
-            "Keong": (60, 61),
-            "Nematoda": (63, 72),
-            "Gulma non parasitik": (74, 77),
-            "Cendawan": (79, 108),
-            "Bakteri": (110, 123),
-            "Virus": (125, 136),
-            "Viroid": (138, 138)
-        }
-
-kategori_map = get_kategori_map(jenis_optk)
-
-def kategori_by_index(index):
-    no = index + 2
-    for kategori, (start, end) in kategori_map.items():
-        if start <= no <= end:
-            return kategori
-    return "Tidak Terklasifikasi"
-
-# === Fungsi bantu ===
-def buat_regex_multi(kata_input):
-    if kata_input:
-        kata_list = [k.strip() for k in kata_input.split(",") if k.strip()]
-        return [re.compile(rf"\b{re.escape(k)}\b", re.IGNORECASE) for k in kata_list]
-    return []
-
-def cocok(pattern_list, teks):
-    if not pattern_list:
+def cocok(pola, teks):
+    """Cek apakah pola cocok dengan teks"""
+    if not pola:
         return True
-    return any(p.search(teks) for p in pattern_list)
+    return re.search(pola, teks, re.IGNORECASE)
+
+def kategori_by_index(i):
+    """Menentukan kategori berdasarkan indeks baris"""
+    if 2 <= i <= 237: return "Serangga"
+    if 239 <= i <= 262: return "Tungau"
+    if 264 <= i <= 278: return "Keong"
+    if 280 <= i <= 293: return "Siput"
+    if 295 <= i <= 360: return "Nematoda"
+    if 362 <= i <= 392: return "Gulma Parasitik"
+    if 398 <= i <= 404: return "Gulma Non Parasitik"
+    if 406 <= i <= 538: return "Cendawan"
+    if 540 <= i <= 594: return "Bakteri"
+    if 596 <= i <= 610: return "Mollicute"
+    if 612 <= i <= 737: return "Virus"
+    return "Lainnya"
+
+# =========================================
+# === Simulasi data record (ganti dengan data aslimu)
+# =========================================
+records = [
+    "1. Bactrocera dorsalis\tMangifera indica\tBuah\tSumatera, Kalimantan",
+    "2. Fusarium oxysporum\tElaeis guineensis\tTanah\tRiau, Jambi",
+    "3. Meloidogyne incognita\tSolanum lycopersicum\tAkar\tJawa Barat",
+    "4. Rhynchophorus ferrugineus\tCocos nucifera\tBatang\tKalimantan Selatan",
+]
+
+# =========================================
+# === Tampilan Aplikasi Streamlit
+# =========================================
+st.set_page_config(page_title="Analisis Data OPTK", layout="wide")
+st.title("🌿 Sistem Analisis dan Pencarian Data OPTK")
+
+tab1, tab2, tab3 = st.tabs([
+    "📋 Pencarian Berdasarkan Inang / Media",
+    "🎯 Analisis Target OPTK",
+    "🔍 Pencarian Berdasarkan Nama OPTK"
+])
 
 # ==========================================================
-# === TAB 1: Pencarian OPTK (TIDAK DIUBAH)
+# === TAB 1: Pencarian Berdasarkan Inang / Media
 # ==========================================================
 with tab1:
-    st.subheader("Masukkan kata pencarian")
-    kata_inang = st.text_input("🪴 Inang / Host (pisahkan koma jika lebih dari satu)")
-    kata_daerah = st.text_input("📍 Daerah Sebar (pisahkan koma jika lebih dari satu)")
-    kata_media = st.text_input("📦 Media Pembawa / Pathway (pisahkan koma jika lebih dari satu)")
+    st.subheader("Cari OPTK Berdasarkan Inang dan Media Pembawa")
 
-    if st.button("🔍 Cari", key="cari_optk"):
-        pattern_inang = buat_regex_multi(kata_inang)
-        pattern_daerah = buat_regex_multi(kata_daerah)
-        pattern_media = buat_regex_multi(kata_media)
+    inang = st.text_input("🪴 Inang / Host", key="inang")
+    media = st.text_input("📦 Media Pembawa (opsional)", key="media")
 
-        hasil = []
-        for rec in records:
-            if cocok(pattern_inang, rec) and cocok(pattern_daerah, rec) and cocok(pattern_media, rec):
-                hasil.append(rec)
+    if st.button("🔍 Cari OPTK", key="cari_optk"):
+        pattern_inang = buat_regex_multi(inang)
+        pattern_media = buat_regex_multi(media)
+        hasil = [r for r in records if cocok(pattern_inang, r) and cocok(pattern_media, r)]
 
         if hasil:
-            st.success(f"Ditemukan {len(hasil)} record pada OPTK {jenis_optk}.")
-            hasil_per_kategori = {}
+            st.success(f"✅ Ditemukan {len(hasil)} hasil cocok.")
             data_csv = []
-
-            for i, h in enumerate(hasil, start=1):
-                kategori = kategori_by_index(records.index(h))
-                hasil_per_kategori.setdefault(kategori, []).append(h)
-
-                h_clean = re.sub(r"^\d+\.\s*", "", h).strip()
-                kata_split = h_clean.split()
-                target = " ".join(kata_split[:3])
-                google_link = f"https://www.google.com/search?q={target.replace(' ', '+')}"
-
-                host = re.search(r"[Hh]ost[:：]\s*([^;]*)", h)
-                pathway = re.search(r"[Pp]athway[:：]\s*([^;]*)", h)
-                dist = re.search(r"[Dd]istribution[:：]\s*([^;]*)", h)
+            for i, teks in enumerate(hasil, 1):
+                kata_split = re.sub(r"^\d+\.\s*", "", teks).split("\t")
+                target = " ".join(kata_split[0].split()[:3])
+                kategori = kategori_by_index(records.index(teks))
+                host = kata_split[1] if len(kata_split) > 1 else "-"
+                media_pembawa = kata_split[2] if len(kata_split) > 2 else "-"
+                distribusi = kata_split[3] if len(kata_split) > 3 else "-"
+                link = f"https://www.google.com/search?q={target.replace(' ', '+')}"
 
                 data_csv.append({
                     "No": i,
                     "Target": target,
                     "Kategori": kategori,
-                    "Host": host.group(1).strip() if host else "-",
-                    "Pathway": pathway.group(1).strip() if pathway else "-",
-                    "Distribution": dist.group(1).strip() if dist else "-",
-                    "Google": google_link
+                    "Host": host,
+                    "Pathway": media_pembawa,
+                    "Distribution": distribusi,
+                    "Google": link
                 })
 
-            for kategori, daftar in hasil_per_kategori.items():
-                st.markdown(f"### 🧬 {kategori} ({len(daftar)} hasil)")
-                for teks in daftar:
-                    kata_split = teks.split()
-                    target = " ".join(kata_split[:3])
-                    link = f"https://www.google.com/search?q={target.replace(' ', '+')}"
-                    st.markdown(f"- [{target}]({link})", unsafe_allow_html=True)
-                st.markdown("---")
+                st.markdown(f"- [{target}]({link})", unsafe_allow_html=True)
 
+            st.markdown("---")
             output = io.StringIO()
             writer = csv.DictWriter(output, fieldnames=["No", "Target", "Kategori", "Host", "Pathway", "Distribution", "Google"])
             writer.writeheader()
             writer.writerows(data_csv)
 
             st.download_button(
-                label=f"💾 Download Hasil OPTK {jenis_optk} (CSV)",
+                label="💾 Download Hasil (CSV)",
                 data=output.getvalue(),
-                file_name=f"hasil_OPTKA{jenis_optk}_grup.csv",
+                file_name="hasil_pencarian_optk.csv",
                 mime="text/csv"
             )
         else:
-            st.warning(f"Tidak ditemukan hasil yang cocok pada OPTK {jenis_optk}.")
+            st.warning("❗ Tidak ditemukan hasil yang cocok.")
+
 
 # ==========================================================
-# === TAB 2: Analisis Target OPTK (DENGAN PENGELOMPOKAN)
+# === TAB 2: Analisis Target OPTK (Asal vs Tujuan)
 # ==========================================================
 with tab2:
     st.subheader("Analisis Target OPTK Berdasarkan Asal & Tujuan")
 
-    inang_asal = st.text_input("🪴 Inang / Host (pisahkan koma jika lebih dari satu)", key="asal_inang")
+    inang_asal = st.text_input("🪴 Inang / Host", key="asal_inang")
     daerah_asal = st.text_input("📍 Daerah Sebar Asal", key="asal_daerah")
     daerah_tujuan = st.text_input("📍 Daerah Sebar Tujuan", key="tujuan_daerah")
     media_asal = st.text_input("📦 Media Pembawa (opsional)", key="asal_media")
@@ -206,3 +155,67 @@ with tab2:
                     st.markdown("---")
             else:
                 st.info("✅ Tidak ada target. Daerah asal dan tujuan memiliki OPTK yang sama.")
+
+
+# ==========================================================
+# === TAB 3: Pencarian Inang & Daerah Sebar Berdasarkan OPTK
+# ==========================================================
+with tab3:
+    st.subheader("Cari Inang dan Daerah Sebar Berdasarkan Nama OPTK")
+
+    optk_input = st.text_input("🧬 Masukkan Nama OPTK (bisa lebih dari satu, pisahkan koma)", key="cari_optk3")
+
+    if st.button("🔎 Cari Data OPTK", key="cari_optk_btn"):
+        if optk_input.strip():
+            pattern_optk = buat_regex_multi(optk_input)
+            hasil_cari = [r for r in records if cocok(pattern_optk, r)]
+
+            if hasil_cari:
+                st.success(f"✅ Ditemukan {len(hasil_cari)} hasil yang cocok.")
+
+                data_tampil = []
+                for i, r in enumerate(hasil_cari, 1):
+                    kategori = kategori_by_index(records.index(r))
+                    teks_bersih = re.sub(r"^\d+\.\s*", "", r)
+                    bagian = teks_bersih.split("\t")
+                    if len(bagian) >= 4:
+                        nama_optk = bagian[0]
+                        host = bagian[1]
+                        media = bagian[2]
+                        distribusi = bagian[3]
+                    else:
+                        nama_optk = bagian[0]
+                        host = "-"
+                        media = "-"
+                        distribusi = "-"
+
+                    data_tampil.append({
+                        "No": i,
+                        "Nama OPTK": nama_optk,
+                        "Kategori": kategori,
+                        "Host": host,
+                        "Media Pembawa": media,
+                        "Daerah Sebar": distribusi,
+                        "Google": f"https://www.google.com/search?q={nama_optk.replace(' ', '+')}"
+                    })
+
+                df_tampil = pd.DataFrame(data_tampil)
+                st.dataframe(df_tampil, use_container_width=True)
+
+                # Tombol unduh CSV
+                output3 = io.StringIO()
+                writer3 = csv.DictWriter(output3, fieldnames=df_tampil.columns)
+                writer3.writeheader()
+                writer3.writerows(data_tampil)
+
+                st.download_button(
+                    label="💾 Download Hasil (CSV)",
+                    data=output3.getvalue(),
+                    file_name="hasil_cari_optk.csv",
+                    mime="text/csv"
+                )
+
+            else:
+                st.warning("❗ Tidak ditemukan hasil yang cocok berdasarkan nama OPTK.")
+        else:
+            st.warning("Masukkan minimal satu nama OPTK terlebih dahulu.")
